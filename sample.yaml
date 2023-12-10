@@ -1,0 +1,29 @@
+apiVersion: wgpolicyk8s.io/v1alpha2
+kind: ClusterPolicyReport
+metadata:
+  creationTimestamp: null
+  name: merged
+results:
+- category: Sample
+  message: 'failed to evaluate preconditions: failed to substitute variables in condition
+    key: failed to resolve serviceAccountName at path : JMESPath query failed: Unknown
+    key "serviceAccountName" in path'
+  policy: check-sa
+  resources:
+  - apiVersion: apps/v1
+    kind: Deployment
+    name: test
+    namespace: default
+  result: error
+  rule: autogen-check-sa
+  scored: true
+  source: kyverno
+  timestamp:
+    nanos: 0
+    seconds: 1702106344
+summary:
+  error: 1
+  fail: 0
+  pass: 0
+  skip: 0
+  warn: 0
