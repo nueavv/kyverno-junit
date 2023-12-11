@@ -6,12 +6,16 @@ package cmd
 
 import (
 	"os"
+	"fmt"
 
 	"github.com/spf13/cobra"
+	"github.com/nueavv/kyverno-junit/utils/converter"
 )
 
 var (
+	filename string
 	output string
+	isclusterpolicy bool
 )
 
 const (
@@ -24,11 +28,35 @@ const (
 var rootCmd = &cobra.Command{
 	Use:   cliName,
 	Args: cobra.MaximumNArgs(1),
-
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
+	Example: `hello`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		return nil
+		data, err := os.ReadFile(filename)
+		if err != nil {
+			return fmt.Errorf("failed read file: %v", err)
+		}
+		
+		switch isclusterpolicy {
+		case true:
+			report, err := converter.readClusterPolicyReport(data)
+			if err != nil {
+				return fmt.Errorf("failed cluster policy report file: %v", err)
+			}
+			err = converter.MakeClusterJunitReport(report, output)
+			if err != nil {
+				return fmt.Errorf("failed make report file: %v", err)
+			}
+		default:
+			report, err := converter.readPolicyReport(data)
+			if err != nil {
+				return fmt.Errorf("failed policy report file: %v", err)
+			}
+			err = converter.MakeJunitReport(report, output)
+			if err != nil {
+				return fmt.Errorf("failed make report file: %v", err)
+			}
+		}
+		fmt.Println("Success")
+		return err
 	},
 }
 
@@ -42,7 +70,10 @@ func Execute() {
 }
 
 func init() {
+	rootCmd.Flags().BoolVarP(&isclusterpolicy, "cluster", "c", false, "Kyverno cluster policy")
+	rootCmd.Flags().StringVarP(&filename, "filename", "f", "", "The kyverno report file(yaml)")
 	rootCmd.Flags().StringVarP(&output, "output", "o", "report.xml", "report filename")
+	if err := rootCmd.MarkFlagRequired("filename"); err != nil {
+		fmt.Printf("error filename flag :%v", err)
+	}
 }
-
-
