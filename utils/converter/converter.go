@@ -63,7 +63,8 @@ func makeReport(results []kyverno.PolicyReportResult) junit.TestSuite {
 	var testsuite junit.TestSuite
 	for _, result := range results {
 		testcase := &junit.TestCase{
-			Name: result.Policy,
+			Name: fmt.Sprintf("Policy: %s, Rule: %s", result.Policy, result.Rule),
+			Status: string(result.Result),
 		}
 
 		switch result.Result {
@@ -77,10 +78,8 @@ func makeReport(results []kyverno.PolicyReportResult) junit.TestSuite {
 				Message: result.Message,
 				Type:    result.Rule,
 			})
-		// case kyverno.StatusPass:
-		// 	testcase.Status =
-		case kyverno.StatusSkip:
-			testcase.Skipped = fmt.Sprintf("Policy: %s, Rule: %s", result.Policy, result.Rule)
+		case kyverno.StatusPass, kyverno.StatusSkip:
+			testcase.Skipped = result.Message
 		}
 		testsuite.TestCases = append(testsuite.TestCases, testcase)
 	}
