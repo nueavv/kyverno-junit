@@ -1,12 +1,12 @@
 package converter
 
 import (
-	"os"
-	"fmt"
 	"encoding/xml"
-	"gopkg.in/yaml.v3"
-	"github.com/nueavv/kyverno-junit/utils/junit"
+	"fmt"
 	kyverno "github.com/kyverno/kyverno/api/policyreport/v1alpha2"
+	"github.com/nueavv/kyverno-junit/utils/junit"
+	"gopkg.in/yaml.v3"
+	"os"
 )
 
 func readClusterPolicyReport(data string) (kyverno.ClusterPolicyReport, error) {
@@ -26,7 +26,6 @@ func readPolicyReport(data string) (kyverno.PolicyReport, error) {
 	}
 	return policyReport, nil
 }
-
 
 func MakeClusterJunitReport(report kyverno.ClusterPolicyReport, output string) error {
 	testsuite := makeReport(report.GetResults())
@@ -60,7 +59,6 @@ func MakeJunitReport(report kyverno.PolicyReport, output string) error {
 	return nil
 }
 
-
 func makeReport(results []kyverno.PolicyReportResult) junit.TestSuite {
 	var testsuite junit.TestSuite
 	for _, result := range results {
@@ -80,11 +78,11 @@ func makeReport(results []kyverno.PolicyReportResult) junit.TestSuite {
 				Type:    result.Rule,
 			})
 		// case kyverno.StatusPass:
-		// 	testcase.Status = 
+		// 	testcase.Status =
 		case kyverno.StatusSkip:
-			testcase.Skipped = fmt.Sprintf("Policy: %s, Rule: %s", result.Policy, result.Rule) 
+			testcase.Skipped = fmt.Sprintf("Policy: %s, Rule: %s", result.Policy, result.Rule)
 		}
 		testsuite.TestCases = append(testsuite.TestCases, testcase)
 	}
 	return testsuite
-} 
+}

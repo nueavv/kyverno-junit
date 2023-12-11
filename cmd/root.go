@@ -1,20 +1,19 @@
 /*
 Copyright © 2023 NAME HERE <EMAIL ADDRESS>
-
 */
 package cmd
 
 import (
-	"os"
 	"fmt"
+	"os"
 
-	"github.com/spf13/cobra"
 	"github.com/nueavv/kyverno-junit/utils/converter"
+	"github.com/spf13/cobra"
 )
 
 var (
-	filename string
-	output string
+	filename        string
+	output          string
 	isclusterpolicy bool
 )
 
@@ -22,19 +21,17 @@ const (
 	cliName = "kyverno-junit"
 )
 
-
-
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   cliName,
-	Args: cobra.MaximumNArgs(1),
+	Use:     cliName,
+	Args:    cobra.MaximumNArgs(1),
 	Example: `hello`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		data, err := os.ReadFile(filename)
 		if err != nil {
 			return fmt.Errorf("failed read file: %v", err)
 		}
-		
+
 		switch isclusterpolicy {
 		case true:
 			report, err := converter.readClusterPolicyReport(data)
