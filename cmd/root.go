@@ -34,7 +34,7 @@ var rootCmd = &cobra.Command{
 
 		switch isclusterpolicy {
 		case true:
-			report, err := converter.readClusterPolicyReport(data)
+			report, err := converter.ReadClusterPolicyReport(data)
 			if err != nil {
 				return fmt.Errorf("failed cluster policy report file: %v", err)
 			}
@@ -43,7 +43,7 @@ var rootCmd = &cobra.Command{
 				return fmt.Errorf("failed make report file: %v", err)
 			}
 		default:
-			report, err := converter.readPolicyReport(data)
+			report, err := converter.ReadPolicyReport(data)
 			if err != nil {
 				return fmt.Errorf("failed policy report file: %v", err)
 			}

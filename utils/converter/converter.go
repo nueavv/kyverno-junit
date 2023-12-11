@@ -9,18 +9,18 @@ import (
 	"os"
 )
 
-func readClusterPolicyReport(data string) (kyverno.ClusterPolicyReport, error) {
+func ReadClusterPolicyReport(data []byte) (kyverno.ClusterPolicyReport, error) {
 	var clusterPolicyReport kyverno.ClusterPolicyReport
-	err := yaml.Unmarshal([]byte(data), &clusterPolicyReport)
+	err := yaml.Unmarshal(data, &clusterPolicyReport)
 	if err != nil {
 		return clusterPolicyReport, err
 	}
 	return clusterPolicyReport, nil
 }
 
-func readPolicyReport(data string) (kyverno.PolicyReport, error) {
+func ReadPolicyReport(data []byte) (kyverno.PolicyReport, error) {
 	var policyReport kyverno.PolicyReport
-	err := yaml.Unmarshal([]byte(data), &policyReport)
+	err := yaml.Unmarshal(data, &policyReport)
 	if err != nil {
 		return policyReport, err
 	}
