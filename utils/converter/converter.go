@@ -2,6 +2,7 @@ package converter
 
 import (
 	"os"
+	"fmt"
 	"encoding/xml"
 	"gopkg.in/yaml.v3"
 	"github.com/nueavv/kyverno-junit/utils/junit"
@@ -28,54 +29,8 @@ func readPolicyReport(data string) (kyverno.PolicyReport, error) {
 
 
 func MakeClusterJunitReport(report kyverno.ClusterPolicyReport, output string) error {
-	var testsuite junit.TestSuite
+	testsuite := makeReport(report.GetResults())
 	testsuite.Name = "kyverno cluster policy report analyze"
-
-	results := kyverno.GetResults(report)
-	for _, result := range results {
-		testcase := &junit.TestCase{
-			Name: result.Policy,
-		}
-
-		switch result.Result() {
-		case kyverno.StatusError:
-			testcase.Errors = append(testcase.Errors, &junit.Error{
-				Message: report.Message,
-				Type:    report.Rule,
-			})
-			// if report.IsFileAnalze() {
-			// 	testcase.Errors[0].File = report.GetErrorFile()
-			// 	testcase.Errors[0].Line = report.GetErrorLine()
-			// }
-		case kyverno.StatusFail:
-			testcase.Failures = append(testcase.Failures, &junit.Failure{
-				Message: report.Message,
-				Type:    report.Rule,
-			})
-		// case kyverno.StatusWarn:
-		// 	testcase.Failures = append(testcase.Failures, &junit.Failure{
-		// 		Message: report.GetMessage(),
-		// 		Type:    report.GetCode(),
-		// 	})
-		// case kyverno.StatusPass:
-		// 	testcase.Errors = append(testcase.Errors, &junit.Error{
-		// 		Message: report.GetMessage(),
-		// 		Type:    report.GetCode(),
-		// 	})
-		// 	if report.IsFileAnalze() {
-		// 		testcase.Errors[0].File = report.GetErrorFile()
-		// 		testcase.Errors[0].Line = report.GetErrorLine()
-		// 	}
-		// case kyverno.StatusSkip:
-		// 	testcase.Failures = append(testcase.Failures, &junit.Failure{
-		// 		Message: report.GetMessage(),
-		// 		Type:    report.GetCode(),
-		// 	})
-		}
-
-		testsuite.TestCases = append(testsuite.TestCases, testcase)
-	}
-
 	xmlBytes, err := xml.Marshal(testsuite)
 	if err != nil {
 		return err
@@ -90,36 +45,8 @@ func MakeClusterJunitReport(report kyverno.ClusterPolicyReport, output string) e
 }
 
 func MakeJunitReport(report kyverno.PolicyReport, output string) error {
-	var testsuite junit.TestSuite
-	// for _, report := range reports {
-	// 	testcase := &junit.TestCase{
-	// 		Name: report.GetOrigin(),
-	// 	}
-
-	// 	switch report.GetLevel() {
-	// 	case converter.StatusError:
-	// 		testcase.Errors = append(testcase.Errors, &junit.Error{
-	// 			Message: report.GetMessage(),
-	// 			Type:    report.GetCode(),
-	// 		})
-	// 		if report.IsFileAnalze() {
-	// 			testcase.Errors[0].File = report.GetErrorFile()
-	// 			testcase.Errors[0].Line = report.GetErrorLine()
-	// 		}
-	// 	case converter.StatusFailed:
-	// 		testcase.Failures = append(testcase.Failures, &junit.Failure{
-	// 			Message: report.GetMessage(),
-	// 			Type:    report.GetCode(),
-	// 		})
-	// 	}
-
-	// 	testsuite.TestCases = append(testsuite.TestCases, testcase)
-	// }
-
+	testsuite := makeReport(report.GetResults())
 	testsuite.Name = "kyverno policy report analyze"
-	// testsuite.Errors = converter.GetErrorCount(reports)
-	// testsuite.Failures = converter.GetWarningCount(reports)
-
 	xmlBytes, err := xml.Marshal(testsuite)
 	if err != nil {
 		return err
@@ -132,3 +59,32 @@ func MakeJunitReport(report kyverno.PolicyReport, output string) error {
 
 	return nil
 }
+
+
+func makeReport(results []kyverno.PolicyReportResult) junit.TestSuite {
+	var testsuite junit.TestSuite
+	for _, result := range results {
+		testcase := &junit.TestCase{
+			Name: result.Policy,
+		}
+
+		switch result.Result {
+		case kyverno.StatusError:
+			testcase.Errors = append(testcase.Errors, &junit.Error{
+				Message: result.Message,
+				Type:    result.Rule,
+			})
+		case kyverno.StatusFail, kyverno.StatusWarn:
+			testcase.Failures = append(testcase.Failures, &junit.Failure{
+				Message: result.Message,
+				Type:    result.Rule,
+			})
+		// case kyverno.StatusPass:
+		// 	testcase.Status = 
+		case kyverno.StatusSkip:
+			testcase.Skipped = fmt.Sprintf("Policy: %s, Rule: %s", result.Policy, result.Rule) 
+		}
+		testsuite.TestCases = append(testsuite.TestCases, testcase)
+	}
+	return testsuite
+} 
